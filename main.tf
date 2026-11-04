@@ -72,3 +72,18 @@ resource "aws_security_group" "web" {
 
   tags = { Name = "web-sg" }
 }
+resource "aws_instance" "web" {
+  ami                    = "ami-0123456789abcdef0" # placeholder AMI ID
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.web.id]
+
+  user_data = <<-EOF
+    #!/bin/bash
+    dnf install -y httpd
+    systemctl enable --now httpd
+    echo "<h1>Hello from my first AWS project</h1>" > /var/www/html/index.html
+  EOF
+
+  tags = { Name = "web-server" }
+}
