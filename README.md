@@ -23,9 +23,18 @@ Codespaces. Plan result: 7 to add, 0 to change, 0 to destroy.
 ![Plan](image.png)
 
 ## Key concepts
-- [Why the subnet is public, in your own words]
-- [Why SSH is limited to one IP]
-- [What the security group is stateful for]
+## Key concepts
+- **Why the subnet is public:** its route table sends `0.0.0.0/0` traffic to the
+  internet gateway, and the route table is associated with the subnet. Without
+  that association the subnet would use the default route table and have no
+  path to the internet.
+- **Why SSH is limited to one IP:** port 22 gives remote control of the server,
+  so I allow it from a single address (`/32`) instead of `0.0.0.0/0`. Opening
+  SSH to the whole internet invites constant brute-force attempts. HTTP on
+  port 80 is open to all because it is a public website.
+- **What stateful means for the security group:** if a request is allowed in,
+  the reply is allowed out automatically, so I don't write separate return
+  rules. A NACL is stateless and would need rules in both directions.
 
 ## Challenges
 - Windows Application Control blocked the Terraform plugin on my laptop,
