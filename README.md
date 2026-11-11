@@ -1,7 +1,8 @@
 # AWS VPC + EC2 Web Server (Terraform)
 
 Designed a web server inside a custom AWS VPC using Terraform.
-**Status: design and plan only, not deployed** (validated with `terraform plan`).
+**Status:** Terraform version validated with `terraform plan` (not deployed).
+Console version built and tested live in AWS, then deleted.
 
 ## Architecture
 ![Architecture](architecture.png)
@@ -48,3 +49,33 @@ Codespaces. Plan result: 7 to add, 0 to change, 0 to destroy.
 
 ## Tools
 Terraform, AWS (VPC, EC2), GitHub Codespaces
+
+## Console version (built and tested live)
+
+I also built the same architecture by hand in the AWS Management Console
+(Sydney region) to understand each piece before automating it.
+
+| Step | What I did |
+|---|---|
+| 1 | Created the VPC (10.0.0.0/16) |
+| 2 | Created a public subnet (10.0.1.0/24) with auto-assign public IP |
+| 3 | Created an internet gateway and attached it to the VPC |
+| 4 | Created a route table with 0.0.0.0/0 to the IGW and linked it to the subnet |
+| 5 | Created a security group: HTTP 80 from anywhere, SSH 22 from my IP only |
+| 6 | Launched a t3.micro EC2 instance with a user data script that installs Apache |
+| 7 | Opened the public IP in a browser and confirmed the page loaded |
+| 8 | Terminated the instance and deleted the VPC to avoid charges |
+
+![Working page](console-version/screenshots/hello-page.png)
+![Route table](console-version/screenshots/route-table.png)
+![Instance](console-version/screenshots/instance.png)
+
+### What I learned
+- A subnet is public because of its route table (0.0.0.0/0 to the IGW), not its name.
+- A new subnet uses the VPC's main route table until you associate your own.
+- The Terraform blocks map one-to-one to these console steps.
+- 251, not 256: the subnet showed 251 available addresses. AWS reserves 5 in every subnet, so /24 doesn’t give you all 256.
+- Not public until the association: the gateway and the route both existed, but the subnet kept using the main route table until you linked public-rt.
+- Terraform vs the console: Terraform created the attachments for you through references like vpc_id, but in the console you had to remember to attach the gateway and associate the route table yourself.
+
+
